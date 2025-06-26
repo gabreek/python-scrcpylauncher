@@ -1,0 +1,7 @@
+ttkthemes
+pillow
+tkinterdnd2
+requests
+psutil
+pefile
+extract-icon
