@@ -47,7 +47,7 @@ sudo apt install adb scrcpy
 ### 2. Clone the Repository
 
 ```bash
-git clone [https://github.com/gabreek/python-scrcpylauncher.git](https://github.com/gabreek/python-scrcpylauncher.git)
+git clone https://github.com/gabreek/python-scrcpylauncher.git
 cd python-scrcpylauncher
 ```
 
