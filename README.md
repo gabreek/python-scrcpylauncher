@@ -1,54 +1,61 @@
-#Scrcpy Launcher
+# Scrcpy Launcher
+
 A simple and lightweight scrcpy GUI compatible with Winlator (bionic) shortcuts.
 
-This tool provides a user-friendly graphical interface to manage and launch scrcpy instances with custom settings for both standard Android apps and Winlator games.
+This tool provides a user-friendly graphical interface to manage and launch `scrcpy` instances with custom settings for both standard Android apps and Winlator games.
 
-✨ Features
-Tabbed Interface: Separate, organized tabs for Android Apps, Winlator Games, and Scrcpy configuration.
+## ✨ Features
 
-Android App Launcher:
+* **Tabbed Interface:** Separate, organized tabs for Android Apps, Winlator Games, and Scrcpy configuration.
+* **Android App Launcher:**
+    * Automatically lists all installed applications on your device.
+    * Scrapes app icons from the Google Play Store.
+    * Supports custom icons via drag-and-drop.
+    * Save specific `scrcpy` settings for each app.
+* **Winlator Game Launcher:**
+    * Automatically discovers game shortcuts (`.desktop` files) from your Winlator installation.
+    * **Automatic Icon Extraction:** Fetches and caches game icons directly from the game's `.exe` file.
+    * Supports custom game icons via drag-and-drop.
+    * Save specific `scrcpy` settings for each game, perfect for custom resolutions and performance tuning.
+* **Advanced Scrcpy Configuration:** A dedicated tab to tweak all major `scrcpy` settings, including resolution, bitrate, codecs, and more. All settings are saved automatically.
+* **Custom Window Icons:** The `scrcpy` window will automatically use the game's or app's icon, providing a native look and feel.
 
-Automatically lists all installed applications on your device.
+---
 
-Scrapes app icons from the Google Play Store.
+## 🚧 To-Do / Future Features
 
-Supports custom icons via drag-and-drop.
+- [ ] Full support for ADB over WiFi.
+- [ ] Multi-device management interface.
+- [ ] ... any other ideas are welcome!
 
-Save specific scrcpy settings for each app.
+---
 
-Winlator Game Launcher:
+## 🚀 Installation
 
-Automatically discovers game shortcuts (.desktop files) from your Winlator installation.
-
-Automatic Icon Extraction: Fetches and caches game icons directly from the game's .exe file.
-
-Supports custom game icons via drag-and-drop.
-
-Save specific scrcpy settings for each game, perfect for custom resolutions and performance tuning.
-
-Advanced Scrcpy Configuration: A dedicated tab to tweak all major scrcpy settings, including resolution, bitrate, codecs, and more. All settings are saved automatically.
-
-Multi-Process Icon Extraction: A non-blocking progress window appears when fetching missing game icons, processing up to 5 games simultaneously for faster results.
-
-Custom Window Icons: The scrcpy window will automatically use the game's or app's icon, providing a native look and feel.
-
-🚀 Installation
 This application is designed for Linux systems.
 
-1. System Dependencies
-First, ensure you have adb and scrcpy installed and available in your system's PATH.
+### 1. System Dependencies
 
+First, ensure you have `adb` and `scrcpy` installed and available in your system's PATH.
+
+```bash
 # On Debian/Ubuntu based systems
 sudo apt update
 sudo apt install adb scrcpy
+```
 
-2. Clone the Repository
-git clone https://github.com/gabreek/python-scrcpylauncher.git
+### 2. Clone the Repository
+
+```bash
+git clone [https://github.com/gabreek/python-scrcpylauncher.git](https://github.com/gabreek/python-scrcpylauncher.git)
 cd python-scrcpylauncher
+```
 
-3. Set Up Python Environment
+### 3. Set Up Python Environment
+
 It is highly recommended to use a Python virtual environment.
 
+```bash
 # Create the virtual environment
 python3 -m venv .venv
 
@@ -57,23 +64,31 @@ source .venv/bin/activate
 
 # Install the required Python packages
 pip install -r requirements.txt
+```
 
-🏃‍♀️ How to Run
-A convenience script run.sh is provided to automatically activate the virtual environment and start the application.
+---
 
-Make the script executable (only needs to be done once):
+## 🏃‍♀️ How to Run
 
-chmod +x run.sh
+A convenience script `run.sh` is provided to automatically activate the virtual environment and start the application.
 
-Run the application:
+1.  **Make the script executable (only needs to be done once):**
+    ```bash
+    chmod +x run.sh
+    ```
 
-./run.sh
+2.  **Run the application:**
+    ```bash
+    ./run.sh
+    ```
 
-🎨 Custom Icons
+---
+
+## 🎨 Custom Icons
+
 One of the key features is the ability to easily customize icons for your apps and games.
 
-Android Apps: If you don't like the icon scraped from the Play Store, simply drag and drop your preferred image file (.png, .jpg, etc.) directly onto the existing icon in the "Apps" tab.
+* **Android Apps:** If you don't like the icon scraped from the Play Store, simply drag and drop your preferred image file (`.png`, `.jpg`, etc.) directly onto the existing icon in the "Apps" tab.
+* **Winlator Games:** If the icon extracted from the `.exe` is incorrect or missing, just drag and drop your game's poster or icon onto the placeholder in the "Winlator" tab.
 
-Winlator Games: If the icon extracted from the .exe is incorrect or missing, just drag and drop your game's poster or icon onto the placeholder in the "Winlator" tab.
-
-The new icon will be automatically resized, converted to .png, and cached for future use.
+The new icon will be automatically resized, converted to `.png`, and cached for future use.
