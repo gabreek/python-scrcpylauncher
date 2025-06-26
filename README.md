@@ -13,7 +13,7 @@ This tool provides a user-friendly graphical interface to manage and launch `scr
     * Supports custom icons via drag-and-drop.
     * Save specific `scrcpy` settings for each app.
 * **Winlator Game Launcher:**
-    * Automatically discovers game shortcuts (`.desktop` files) from your Winlator installation.
+    * Automatically discovers game shortcuts (`.desktop` files) from your Winlator installation (you need export shortcut to frontend in winlator app).
     * **Automatic Icon Extraction:** Fetches and caches game icons directly from the game's `.exe` file.
     * Supports custom game icons via drag-and-drop.
     * Save specific `scrcpy` settings for each game, perfect for custom resolutions and performance tuning.
