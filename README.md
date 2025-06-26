@@ -17,7 +17,7 @@ This tool provides a user-friendly graphical interface to manage and launch `scr
     * **Automatic Icon Extraction:** Fetches and caches game icons directly from the game's `.exe` file.
     * Supports custom game icons via drag-and-drop.
     * Save specific `scrcpy` settings for each game, perfect for custom resolutions and performance tuning.
-* **Advanced Scrcpy Configuration:** A dedicated tab to tweak all major `scrcpy` settings, including resolution, bitrate, codecs, and more. All settings are saved automatically. (First release requires you to open the program with the phone to be connected via usb to populate codecs lists)
+* **Advanced Scrcpy Configuration:** A dedicated tab to tweak all major `scrcpy` settings, including resolution, bitrate, codecs, and more. All settings are saved automatically. (First release requires you to open the program with the phone connected via usb to populate codecs lists)
 * **Custom Window Icons:** The `scrcpy` window will automatically use the game's or app's icon, providing a native look and feel.
 
 ---
