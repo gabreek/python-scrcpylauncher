@@ -24,6 +24,8 @@ This tool provides a user-friendly graphical interface to manage and launch `scr
 
 ## 🚧 To-Do / Future Features
 
+- [ ] Finish options GUI (you can use custom options commands).
+- [ ] Multiple windows audio management.
 - [ ] Full support for ADB over WiFi.
 - [ ] Multi-device management interface.
 - [ ] ... any other ideas are welcome!
