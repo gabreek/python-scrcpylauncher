@@ -7,6 +7,58 @@ import psutil
 import os
 import json
 import re
+import threading
+
+# Lista global para armazenar as sessões Scrcpy ativas
+active_scrcpy_sessions = []
+
+def add_scrcpy_session(pid, app_name, icon_path, command_args):
+    active_scrcpy_sessions.append({'pid': pid, 'app_name': app_name, 'icon_path': icon_path, 'command_args': command_args})
+    print(f"[scrcpy_handler] Added session: PID={pid}, AppName={app_name}")
+
+def remove_scrcpy_session(pid):
+    global active_scrcpy_sessions
+    initial_len = len(active_scrcpy_sessions)
+    active_scrcpy_sessions = [s for s in active_scrcpy_sessions if s['pid'] != pid]
+    if len(active_scrcpy_sessions) < initial_len:
+        print(f"[scrcpy_handler] Removed session: PID={pid}")
+
+def get_active_scrcpy_sessions():
+    print(f"[scrcpy_handler] Checking active sessions. Current count: {len(active_scrcpy_sessions)}")
+    current_pids = {p.pid for p in psutil.process_iter(['pid'])} # Otimização: obter PIDs uma vez
+    valid_sessions = []
+    for session in active_scrcpy_sessions:
+        if session['pid'] in current_pids:
+            try:
+                proc = psutil.Process(session['pid'])
+                proc_name = proc.name().lower()
+                proc_cmdline = " ".join(proc.cmdline())
+                if proc.is_running() and ('scrcpy' in proc_name or 'scrcpy' in proc_cmdline):
+                    valid_sessions.append(session)
+                else:
+                    print(f"[scrcpy_handler] Invalid session (not scrcpy or not running): PID={session['pid']}, Name={proc_name}, Cmdline={proc_cmdline}")
+            except psutil.NoSuchProcess:
+                print(f"[scrcpy_handler] Invalid session (no such process): PID={session['pid']}")
+        else:
+            print(f"[scrcpy_handler] Invalid session (PID not in current processes): PID={session['pid']}")
+    active_scrcpy_sessions[:] = valid_sessions # Atualiza a lista global
+    print(f"[scrcpy_handler] Valid sessions after check: {len(active_scrcpy_sessions)}")
+    return active_scrcpy_sessions
+
+def kill_scrcpy_session(pid):
+    try:
+        process = psutil.Process(pid)
+        process.terminate()
+        process.wait(timeout=5) # Espera o processo terminar
+        if process.is_running():
+            process.kill() # Força o encerramento se não terminar
+        remove_scrcpy_session(pid)
+        return True
+    except psutil.NoSuchProcess:
+        remove_scrcpy_session(pid) # Remove se o processo já não existe
+        return True
+    except Exception as e:
+        return False
 
 def _build_command(config_values, window_title=None, device_id=None):
     """Constrói a lista de argumentos para o comando scrcpy."""
@@ -24,11 +76,16 @@ def _build_command(config_values, window_title=None, device_id=None):
     if config_values.get('turn_screen_off'): cmd.append('--turn-screen-off')
     if config_values.get('fullscreen'): cmd.append('--fullscreen')
     if config_values.get('mipmaps'): cmd.append('--no-mipmaps')
-    cmd.append('--stay-awake')
+    if config_values.get('stay_awake'): cmd.append('--stay-awake')
+    if config_values.get('no_audio'): cmd.append('--no-audio')
+    if config_values.get('no_video'): cmd.append('--no-video')
 
     map_args = {
         'start_app': '--start-app',
         'mouse_mode': '--mouse',
+        'gamepad_mode': '--gamepad',
+        'keyboard_mode': '--keyboard',
+        'mouse_bind': '--mouse-bind',
         'render_driver': '--render-driver',
         'max_fps': '--max-fps',
         'video_bitrate_slider': '--video-bit-rate',
@@ -37,7 +94,7 @@ def _build_command(config_values, window_title=None, device_id=None):
     }
     for key, arg_name in map_args.items():
         val = config_values.get(key)
-        if val and str(val) not in ('Auto', 'None', '0', ''):
+        if val and str(val) not in ('Auto', 'None', '0', 'disabled', ''):
             suffix = 'K' if key == 'video_bitrate_slider' else ''
             cmd.append(f"{arg_name}={val}{suffix}")
 
@@ -63,10 +120,9 @@ def _build_command(config_values, window_title=None, device_id=None):
     if new_display_val and new_display_val != 'Disabled':
         cmd.append(f"--new-display={new_display_val}")
     else:
-        resolution_val = config_values.get('resolution')
-        if resolution_val and resolution_val != 'Auto':
-            resolution_width = resolution_val.split('x')[0]
-            cmd.append(f"--max-size={resolution_width}")
+        max_size_val = config_values.get('max_size')
+        if max_size_val and max_size_val != '0':
+            cmd.append(f"--max-size={max_size_val}")
 
     extra = config_values.get('extraargs', '').strip()
     if extra:
@@ -100,22 +156,15 @@ def launch_scrcpy(config_values, capture_output=False, window_title=None, device
         startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
 
     if capture_output:
-        # Passa o ambiente modificado para o subprocesso
-        return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, startupinfo=startupinfo, env=env)
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, startupinfo=startupinfo, env=env)
     else:
-        # Passa o ambiente modificado para o subprocesso
-        subprocess.Popen(cmd, startupinfo=startupinfo, env=env)
+        process = subprocess.Popen(cmd, startupinfo=startupinfo, env=env)
 
-def kill_scrcpy_processes():
-    count = 0
-    for proc in psutil.process_iter(['pid', 'name']):
-        if 'scrcpy' in proc.info['name'].lower():
-            try:
-                proc.kill()
-                count += 1
-            except (psutil.NoSuchProcess, psutil.AccessDenied):
-                pass
-    print(f"Killed {count} scrcpy processes.")
+    # Adiciona a sessão à lista de sessões ativas
+    app_name = window_title or config_values.get('start_app_name') or 'Unknown App'
+    add_scrcpy_session(process.pid, app_name, icon_path, cmd)
+
+    return process
 
 def list_installed_apps():
     try:

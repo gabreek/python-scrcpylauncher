@@ -6,9 +6,9 @@ from tkinter import ttk
 
 def create_scrolling_frame(parent):
     """Cria um frame com uma barra de rolagem vertical."""
-    canvas = tk.Canvas(parent, bg='#2e2e2e', highlightthickness=0)
+    canvas = tk.Canvas(parent, highlightthickness=0)
     scrollbar = ttk.Scrollbar(parent, orient='vertical', command=canvas.yview)
-    scrollable_frame = ttk.Frame(canvas, style='Dark.TFrame')
+    scrollable_frame = ttk.Frame(canvas)
 
     scrollable_frame.bind(
         "<Configure>",
@@ -43,20 +43,18 @@ def create_scrolling_frame(parent):
 
 def create_slider(parent, label, var, from_, to, step=1, suffix=""):
     """Cria um widget de slider simples."""
-    frm = ttk.Frame(parent, style='Dark.TFrame')
+    frm = ttk.Frame(parent)
     frm.pack(fill='x', padx=10, pady=2)
-    ttk.Label(frm, text=label, width=15, anchor='w', background='#2e2e2e').pack(side='left')
-    value_label = ttk.Label(frm, text=f"{var.get()}{suffix}", background='#2e2e2e')
+    ttk.Label(frm, text=label, width=15, anchor='w').pack(side='left')
+    value_label = ttk.Label(frm, text=f"{var.get()}{suffix}")
     value_label.pack(side='right')
 
     def update_label(val):
         value_label.config(text=f"{int(float(val))}{suffix}")
 
-    scale = tk.Scale(
-        frm, from_=from_, to=to, variable=var, orient='horizontal', resolution=step,
-        showvalue=False, bg="#2e2e2e", fg="white", highlightthickness=0,
-        troughcolor="#3c3c3c", sliderrelief="flat", activebackground="#555",
-        length=150, command=update_label
+    scale = ttk.Scale(
+        frm, from_=from_, to=to, variable=var, orient='horizontal',
+        value=var.get(), command=update_label
     )
     scale.pack(side='left', fill='x', expand=True)
 
@@ -78,26 +76,24 @@ def create_slider(parent, label, var, from_, to, step=1, suffix=""):
 
     update_label(var.get())
 
-def create_slider_with_buttons(parent, label, var, from_, to, step=1, suffix="", presets=[]):
+def create_slider_with_buttons(parent, label, var, from_, to, step=1, suffix="", presets=[], button_style="Small.TButton"):
     """Cria um widget de slider com botões de predefinição."""
-    main_frame = ttk.Frame(parent, style='Dark.TFrame')
+    main_frame = ttk.Frame(parent)
     main_frame.pack(fill='x', padx=10, pady=2)
 
-    top_frame = ttk.Frame(main_frame, style='Dark.TFrame')
+    top_frame = ttk.Frame(main_frame)
     top_frame.pack(fill='x')
 
-    ttk.Label(top_frame, text=label, width=15, anchor='w', background='#2e2e2e').pack(side='left')
-    value_label = ttk.Label(top_frame, text=f"{var.get()}{suffix}", width=6, background='#2e2e2e')
+    ttk.Label(top_frame, text=label, width=15, anchor='w').pack(side='left')
+    value_label = ttk.Label(top_frame, text=f"{var.get()}{suffix}", width=6)
     value_label.pack(side='right', padx=(5,0))
 
     def update_label(val):
         value_label.config(text=f"{int(float(val))}{suffix}")
 
-    scale = tk.Scale(
-        top_frame, from_=from_, to=to, variable=var, orient='horizontal', resolution=step,
-        showvalue=False, bg="#2e2e2e", fg="white", highlightthickness=0,
-        troughcolor="#3c3c3c", sliderrelief="flat", activebackground="#555",
-        length=150, command=update_label
+    scale = ttk.Scale(
+        top_frame, from_=from_, to=to, variable=var, orient='horizontal',
+        value=var.get(), command=update_label
     )
     scale.pack(side='left', fill='x', expand=True)
 
@@ -117,9 +113,9 @@ def create_slider_with_buttons(parent, label, var, from_, to, step=1, suffix="",
     scale.bind("<Button-5>", on_scroll)
 
     if presets:
-        center_frame = ttk.Frame(main_frame, style='Dark.TFrame')
+        center_frame = ttk.Frame(main_frame)
         center_frame.pack(fill='x')
-        btn_frame = ttk.Frame(center_frame, style='Dark.TFrame')
+        btn_frame = ttk.Frame(center_frame)
         btn_frame.pack()
 
         def set_and_update(value_to_set):
@@ -128,7 +124,7 @@ def create_slider_with_buttons(parent, label, var, from_, to, step=1, suffix="",
 
         for val in presets:
             ttk.Button(
-                btn_frame, text=str(val), style="Small.TButton", width=5,
+                btn_frame, text=str(val), style=f"{button_style}.TButton" if "Font6" in button_style else button_style, width=5,
                 command=lambda v=val: set_and_update(v)
             ).pack(side='left', padx=2)
 

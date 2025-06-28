@@ -24,24 +24,24 @@ class AppItem:
         self.metadata = self.app_config.get_app_metadata(self.pkg_name)
         self.is_pinned = self.metadata.get('pinned', False)
 
-        self.frame = ttk.Frame(parent, style='Dark.TFrame', width=90, height=110)
+        self.frame = ttk.Frame(parent, width=90, height=110)
         self.frame.pack_propagate(False)
         self.frame.grid_rowconfigure(0, weight=0); self.frame.grid_rowconfigure(1, weight=1); self.frame.grid_rowconfigure(2, weight=0); self.frame.grid_columnconfigure(0, weight=1)
 
-        self.icon_label = ttk.Label(self.frame, image=placeholder_icon, background='#2e2e2e', cursor="hand2")
+        self.icon_label = ttk.Label(self.frame, image=placeholder_icon, cursor="hand2")
         self.icon_label.image = placeholder_icon
         self.icon_label.bind("<Button-1>", lambda e: self.on_launch(self.pkg_name))
         self.icon_label.drop_target_register(DND_FILES); self.icon_label.dnd_bind('<<Drop>>', self.on_icon_drop)
 
-        self.name_label = ttk.Label(self.frame, text=self.app_name, wraplength=85, justify='center', background='#2e2e2e', font=("Arial", 8))
+        self.name_label = ttk.Label(self.frame, text=self.app_name, wraplength=70, justify='center', font=("Helvetica", 8, "bold"))
         self.name_label.bind("<Button-1>", lambda e: self.on_launch(self.pkg_name))
 
-        action_frame = ttk.Frame(self.frame, style='Dark.TFrame')
-        save_btn = ttk.Button(action_frame, text="⚙️", width=3, style="Small.TButton", command=self.save_app_config)
-        save_btn.pack(side='left', padx=2)
+        action_frame = ttk.Frame(self.frame)
+        save_btn = ttk.Button(action_frame, text="⚙️", style="Small.TButton", command=self.save_app_config)
+        save_btn.pack(side='left', padx=2, pady=2)
         self.pin_char = "⭐" if self.is_pinned else "☆"
-        self.pin_button = ttk.Button(action_frame, text=self.pin_char, command=self.toggle_pin, width=3, style="Small.TButton")
-        self.pin_button.pack(side='left', padx=2)
+        self.pin_button = ttk.Button(action_frame, text=self.pin_char, command=self.toggle_pin, style="Small.TButton")
+        self.pin_button.pack(side='left', padx=2, pady=2)
 
         self.icon_label.grid(row=0, column=0, pady=(5, 2)); self.name_label.grid(row=1, column=0, sticky="nsew", padx=4); action_frame.grid(row=2, column=0, pady=(2, 5))
 
@@ -50,14 +50,14 @@ class AppItem:
             filepath = self.parent.tk.splitlist(event.data)[0]
         except (tk.TclError, IndexError): return
         if not filepath.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.ico')):
-            messagebox.showerror("Arquivo Inválido", "Por favor, solte um arquivo de imagem válido."); return
+            messagebox.showerror("Invalid File", "Please drop a valid image file."); return
         try:
             dest_path = os.path.join(self.app_config.ICON_CACHE_DIR, f"{self.pkg_name}.png")
             img = Image.open(filepath).resize((48, 48), Image.LANCZOS); img.save(dest_path, 'PNG')
             self.app_config.save_app_metadata(self.pkg_name, {'custom_icon': True, 'icon_fetch_failed': True})
             photo = ImageTk.PhotoImage(img); self.set_icon(photo)
         except Exception as e:
-            messagebox.showerror("Erro", f"Ocorreu um erro ao processar o ícone: {e}")
+            messagebox.showerror("Error", f"An error occurred while processing the icon: {e}")
 
     def set_icon(self, img):
         if self.frame.winfo_exists():
@@ -75,7 +75,7 @@ class AppItem:
 
 
 def create_apps_tab(notebook, app_config):
-    apps_frame = ttk.Frame(notebook, style='Dark.TFrame'); notebook.add(apps_frame, text='Apps')
+    apps_frame = ttk.Frame(notebook); notebook.add(apps_frame, text='Apps')
     all_apps, app_items = {}, {}
 
     try:
@@ -84,7 +84,7 @@ def create_apps_tab(notebook, app_config):
     except (FileNotFoundError, NameError):
         placeholder_img = Image.new('RGBA', (48, 48), (60, 60, 60, 255)); placeholder_icon = ImageTk.PhotoImage(placeholder_img)
 
-    top_panel = ttk.Frame(apps_frame, style='Dark.TFrame'); top_panel.pack(fill='x', padx=10, pady=5)
+    top_panel = ttk.Frame(apps_frame); top_panel.pack(fill='x', padx=10, pady=5)
     search_var = tk.StringVar(); search_entry = ttk.Entry(top_panel, textvariable=search_var); search_entry.pack(fill='x', expand=True, side='left', padx=(0, 5))
     refresh_button = ttk.Button(top_panel, text="Refresh Apps", style="Small.TButton"); refresh_button.pack(side='right')
 
@@ -142,13 +142,17 @@ def create_apps_tab(notebook, app_config):
                 else: other_apps.append(app_info)
         def create_grid_section(parent, apps_list, title):
             if not apps_list: return
-            ttk.Label(parent, text=title, font=("Arial", 10, "bold"), background='#2e2e2e').pack(fill='x', pady=(10, 5), padx=2)
-            grid_container = ttk.Frame(parent, style='Dark.TFrame'); grid_container.pack()
-            grid_frame = ttk.Frame(grid_container, style='Dark.TFrame'); grid_frame.pack()
+            ttk.Label(parent, text=title, font=("Arial", 10, "bold")).pack(fill='x', pady=(10, 5), padx=2)
+            grid_container = ttk.Frame(parent); grid_container.pack()
+            grid_frame = ttk.Frame(grid_container); grid_frame.pack()
+            configured_rows = set()
             for i, app_info in enumerate(apps_list):
                 row, col = divmod(i, 4)
+                if row not in configured_rows:
+                    grid_frame.grid_rowconfigure(row, weight=1)
+                    configured_rows.add(row)
                 item = AppItem(grid_frame, app_info, app_config, launch_app, lambda: populate_apps_grid(search_var.get()), placeholder_icon)
-                item.frame.grid(row=row, column=col, padx=2, pady=5); app_items[app_info['pkg_name']] = item
+                item.frame.grid(row=row, column=col, padx=2, pady=5, sticky="nsew"); app_items[app_info['pkg_name']] = item
         create_grid_section(content_frame, pinned_apps, "Pinned"); create_grid_section(content_frame, other_apps, "All Apps")
         apps_frame.after(10, lambda: bind_mouse_wheel_to_children(content_frame)); apps_frame.after(50, update_scroll_region)
         run_threaded(load_icons_in_background, force_download=force_icon_download)
@@ -171,7 +175,7 @@ def create_apps_tab(notebook, app_config):
     def refresh_all_apps():
         search_var.set(""); refresh_button.config(state='disabled')
         for widget in content_frame.winfo_children(): widget.destroy()
-        loading_label = ttk.Label(content_frame, text="Loading apps...", background='#2e2e2e'); loading_label.pack(pady=20)
+        loading_label = ttk.Label(content_frame, text="Loading apps..."); loading_label.pack(pady=20)
         def on_list_success(apps):
             loading_label.destroy(); nonlocal all_apps
             all_apps = {pkg: {'pkg_name': pkg, 'app_name': name} for name, pkg in apps.items() if name}
@@ -188,4 +192,3 @@ def create_apps_tab(notebook, app_config):
         apps_frame.after(100, populate_apps_grid)
 
     search_entry.bind("<KeyRelease>", on_search_change); refresh_button.config(command=refresh_all_apps); load_from_cache()
-

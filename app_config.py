@@ -11,7 +11,7 @@ class AppConfig:
     Gerencia todas as configurações do aplicativo, incluindo caminhos de arquivos,
     metadados de apps e variáveis Tkinter que guardam o estado da interface.
     """
-    def __init__(self):
+    def __init__(self, root):
         if platform.system() == "Windows":
             self.CONFIG_DIR = os.path.join(os.getenv('APPDATA'), 'ScrcpyLauncher')
         else:
@@ -33,30 +33,40 @@ class AppConfig:
 
         # Mapeamento e criação de todas as variáveis Tkinter
         self.vars = {
-            'start_app': tk.StringVar(value=self.config_data.get('start_app', '')),
-            'start_app_name': tk.StringVar(value=self.config_data.get('start_app_name', 'None')),
-            'mouse_mode': tk.StringVar(value=self.config_data.get('mouse_mode', 'sdk')),
-            'mouse_bind': tk.StringVar(value=self.config_data.get('mouse_bind', '++++:bhsn')),
-            'render_driver': tk.StringVar(value=self.config_data.get('render_driver', 'opengl')),
-            'max_fps': tk.StringVar(value=self.config_data.get('max_fps', '60')),
-            'resolution': tk.StringVar(value=self.config_data.get('resolution', 'Auto')),
-            'display': tk.StringVar(value=self.config_data.get('display', 'Auto')),
-            'new_display': tk.StringVar(value=self.config_data.get('new_display', 'Disabled')),
-            'video_codec': tk.StringVar(value=self.config_data.get('video_codec', 'Auto')),
-            'video_encoder': tk.StringVar(value=self.config_data.get('video_encoder', 'Auto')),
-            'audio_codec': tk.StringVar(value=self.config_data.get('audio_codec', 'Auto')),
-            'audio_encoder': tk.StringVar(value=self.config_data.get('audio_encoder', 'Auto')),
-            'extraargs': tk.StringVar(value=self.config_data.get('extraargs', '')),
+            'theme': tk.StringVar(master=root, value=self.config_data.get('theme', 'superhero')),
+            'start_app': tk.StringVar(master=root, value=self.config_data.get('start_app', '')),
+            'start_app_name': tk.StringVar(master=root, value=self.config_data.get('start_app_name', 'None')),
+            'mouse_mode': tk.StringVar(master=root, value=self.config_data.get('mouse_mode', 'sdk')),
+            'gamepad_mode': tk.StringVar(master=root, value=self.config_data.get('gamepad_mode', 'disabled')),
+            'keyboard_mode': tk.StringVar(master=root, value=self.config_data.get('keyboard_mode', 'sdk')),
+            'mouse_bind': tk.StringVar(master=root, value=self.config_data.get('mouse_bind', '++++:bhsn')),
+            'render_driver': tk.StringVar(master=root, value=self.config_data.get('render_driver', 'opengl')),
+            'max_fps': tk.StringVar(master=root, value=self.config_data.get('max_fps', '60')),
+            'max_size': tk.StringVar(master=root, value=self.config_data.get('max_size', '0')),
+            'display': tk.StringVar(master=root, value=self.config_data.get('display', 'Auto')),
+            'new_display': tk.StringVar(master=root, value=self.config_data.get('new_display', 'Disabled')),
+            'video_codec': tk.StringVar(master=root, value=self.config_data.get('video_codec', 'Auto')),
+            'video_encoder': tk.StringVar(master=root, value=self.config_data.get('video_encoder', 'Auto')),
+            'audio_codec': tk.StringVar(master=root, value=self.config_data.get('audio_codec', 'Auto')),
+            'audio_encoder': tk.StringVar(master=root, value=self.config_data.get('audio_encoder', 'Auto')),
+            'extraargs': tk.StringVar(master=root, value=self.config_data.get('extraargs', '')),
 
-            'mipmaps': tk.BooleanVar(value=self.config_data.get('mipmaps', False)),
-            'turn_screen_off': tk.BooleanVar(value=self.config_data.get('turn_screen_off', False)),
-            'fullscreen': tk.BooleanVar(value=self.config_data.get('fullscreen', False)),
-            'use_ludashi_pkg': tk.BooleanVar(value=self.config_data.get('use_ludashi_pkg', False)),
+            'mipmaps': tk.BooleanVar(master=root, value=self.config_data.get('mipmaps', False)),
+            'turn_screen_off': tk.BooleanVar(master=root, value=self.config_data.get('turn_screen_off', False)),
+            'fullscreen': tk.BooleanVar(master=root, value=self.config_data.get('fullscreen', False)),
+            'use_ludashi_pkg': tk.BooleanVar(master=root, value=self.config_data.get('use_ludashi_pkg', False)),
+            'no_audio': tk.BooleanVar(master=root, value=self.config_data.get('no_audio', False)),
+            'no_video': tk.BooleanVar(master=root, value=self.config_data.get('no_video', False)),
 
-            'video_bitrate_slider': tk.IntVar(value=self.config_data.get('video_bitrate_slider', 3000)),
-            'audio_buffer': tk.IntVar(value=self.config_data.get('audio_buffer', 5)),
-            'video_buffer': tk.IntVar(value=self.config_data.get('video_buffer', 0)),
+            'video_bitrate_slider': tk.IntVar(master=root, value=self.config_data.get('video_bitrate_slider', 3000)),
+            'audio_buffer': tk.IntVar(master=root, value=self.config_data.get('audio_buffer', 5)),
+            'video_buffer': tk.IntVar(master=root, value=self.config_data.get('video_buffer', 0)),
         }
+
+        # Adiciona trace para salvar a configuração automaticamente
+        for var in self.vars.values():
+            if isinstance(var, (tk.StringVar, tk.BooleanVar, tk.IntVar)):
+                var.trace_add('write', lambda *args: self.save_config())
 
     def get(self, key):
         """Retorna a variável Tkinter para uma dada chave."""

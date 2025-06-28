@@ -25,18 +25,20 @@ class WinlatorGameItem:
         self.on_launch = on_launch
         self.game_name = game_info['name']
         self.game_path = game_info['path']
-        self.frame = ttk.Frame(parent, style='Dark.TFrame', width=90, height=110)
-        self.frame.pack_propagate(False)
+        self.frame = ttk.Frame(parent)
+        self.frame.columnconfigure(0, weight=1)
         self.frame.grid_rowconfigure(0, weight=0); self.frame.grid_rowconfigure(1, weight=1); self.frame.grid_rowconfigure(2, weight=0); self.frame.grid_columnconfigure(0, weight=1)
-        self.icon_label = ttk.Label(self.frame, image=placeholder_icon, background='#2e2e2e', cursor="hand2")
+        self.icon_label = ttk.Label(self.frame, image=placeholder_icon, cursor="hand2")
         self.icon_label.image = placeholder_icon
         self.icon_label.bind("<Button-1>", lambda e: self.on_launch(self.game_path, self.game_name))
         self.icon_label.drop_target_register(DND_FILES); self.icon_label.dnd_bind('<<Drop>>', self.on_icon_drop)
-        self.name_label = ttk.Label(self.frame, text=self.game_name, wraplength=85, justify='center', background='#2e2e2e', font=("Arial", 8))
+        self.name_label = ttk.Label(self.frame, text=self.game_name, wraplength=80, justify='center', font=("Helvetica", 8, "bold"))
         self.name_label.bind("<Button-1>", lambda e: self.on_launch(self.game_path, self.game_name))
-        action_frame_container = ttk.Frame(self.frame, style='Dark.TFrame'); action_frame = ttk.Frame(action_frame_container, style='Dark.TFrame'); action_frame.pack()
-        save_btn = ttk.Button(action_frame, text=" ⚙️", width=3, style="Small.TButton", command=self.save_game_config); save_btn.pack(side='left', padx=2)
-        del_btn = ttk.Button(action_frame, text=" 🗑️", width=3, style="Small.TButton", command=self.delete_game_config); del_btn.pack(side='left', padx=2)
+        action_frame_container = ttk.Frame(self.frame); action_frame = ttk.Frame(action_frame_container); action_frame.pack()
+        save_btn = ttk.Button(action_frame, text=" ⚙️", style="Small.TButton", command=self.save_game_config)
+        save_btn.pack(side='left', padx=2, pady=2)
+        del_btn = ttk.Button(action_frame, text=" 🗑️", style="Small.TButton", command=self.delete_game_config)
+        del_btn.pack(side='left', padx=2, pady=2)
         self.icon_label.grid(row=0, column=0, pady=(5, 2)); self.name_label.grid(row=1, column=0, sticky="nsew", padx=4); action_frame_container.grid(row=2, column=0, pady=(2, 5))
 
     def on_icon_drop(self, event):
@@ -65,7 +67,7 @@ class WinlatorGameItem:
 
 
 def create_winlator_tab(notebook, app_config):
-    winlator_frame = ttk.Frame(notebook, style='Dark.TFrame'); notebook.add(winlator_frame, text='Winlator')
+    winlator_frame = ttk.Frame(notebook); notebook.add(winlator_frame, text='Winlator')
     all_games, game_items = [], {}; temp_dir = tempfile.gettempdir()
     extraction_queue = queue.Queue()
 
@@ -89,7 +91,7 @@ def create_winlator_tab(notebook, app_config):
     except (FileNotFoundError, NameError):
         placeholder_img = Image.new('RGBA', (48, 48), (60, 60, 60, 255)); placeholder_icon = ImageTk.PhotoImage(placeholder_img)
 
-    top_panel = ttk.Frame(winlator_frame, style='Dark.TFrame'); top_panel.pack(fill='x', padx=10, pady=5)
+    top_panel = ttk.Frame(winlator_frame); top_panel.pack(fill='x', padx=10, pady=5)
 
 
 
@@ -167,12 +169,15 @@ def create_winlator_tab(notebook, app_config):
         for widget in content_frame.winfo_children(): widget.destroy()
         game_items.clear()
 
+        for i in range(4):
+            content_frame.grid_columnconfigure(i, weight=1, uniform="winlator_col")
+
         if not all_games:
-            message_label = ttk.Label(content_frame, text="No Winlator shortcut found .", background='#2e2e2e'); message_label.grid(row=0, column=0, columnspan=4, pady=10, padx=10)
+            message_label = ttk.Label(content_frame, text="No Winlator shortcut found ."); message_label.grid(row=0, column=0, columnspan=4, pady=10, padx=10)
             return
         for i, game_info in enumerate(all_games):
             row, col = divmod(i, 4)
-            item = WinlatorGameItem(content_frame, game_info, app_config, execute_winlator_flow, placeholder_icon); item.frame.grid(row=row, column=col, padx=1, pady=1)
+            item = WinlatorGameItem(content_frame, game_info, app_config, execute_winlator_flow, placeholder_icon); item.frame.grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
             game_items[game_info['path']] = item
         winlator_frame.after(10, lambda: bind_mouse_wheel_to_children(content_frame)); winlator_frame.after(50, lambda: content_frame.update_idletasks())
         load_cached_icons()
@@ -271,7 +276,7 @@ def create_winlator_tab(notebook, app_config):
     def refresh_games_list():
         refresh_button.config(state='disabled')
         for widget in content_frame.winfo_children(): widget.destroy()
-        loading_label = ttk.Label(content_frame, text="Procurando jogos...", background='#2e2e2e')
+        loading_label = ttk.Label(content_frame, text="Searching for games...")
         loading_label.grid(row=0, column=0, columnspan=4, pady=20, padx=10); content_frame.update_idletasks()
         def on_list_success(games_with_names):
             loading_label.destroy(); nonlocal all_games
