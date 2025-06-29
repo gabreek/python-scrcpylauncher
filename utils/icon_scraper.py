@@ -11,7 +11,7 @@ def get_icon(package_name, app_config, download_if_missing=True):
     Obtém o ícone de um app. Se `download_if_missing` for True, tenta baixar.
     Retorna o caminho para o ícone em cache ou None.
     """
-    cache_dir = app_config.ICON_CACHE_DIR
+    cache_dir = app_config.get_icon_cache_dir()
     icon_path = os.path.join(cache_dir, f"{package_name}.png")
 
     if os.path.exists(icon_path):

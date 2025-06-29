@@ -1,7 +1,9 @@
 # FILE: gui/main_window.py
 # PURPOSE: Define a estrutura principal da interface gráfica (janela e abas).
 
-from tkinter import ttk
+from tkinter import ttk, messagebox
+import threading
+from utils import adb_handler
 from .scrcpy_frame import create_scrcpy_tab
 from .winlator_frame import create_winlator_tab
 from .apps_frame import create_apps_tab
@@ -13,20 +15,35 @@ class MainWindow:
     def __init__(self, root, app_config, style, restart_app_callback):
         self.root = root
         self.app_config = app_config
-        self.session_manager_window = None # Reference to the ScrcpySessionManagerWindow
+        self.restart_app_callback = restart_app_callback
+        self.session_manager_window = None
+        self.initial_device_id = app_config.get('device_id').get()
 
-        # Cria o Notebook (gerenciador de abas)
         notebook = ttk.Notebook(root)
         notebook.pack(fill='both', expand=True, padx=5, pady=5)
 
-        # Botão para abrir o gerenciador de sessões
         self.session_manager_button = ttk.Button(root, text="▶", command=self.open_session_manager, style="Small.TButton")
         self.session_manager_button.place(relx=1.0, x=-5, y=5, anchor='ne', width=25, height=25)
 
-        # Cria e adiciona as abas, passando as dependências necessárias
-        create_apps_tab(notebook, self.app_config)
-        create_winlator_tab(notebook, self.app_config)
-        create_scrcpy_tab(notebook, self.app_config, style, restart_app_callback)
+        self.update_apps_tab = create_apps_tab(notebook, self.app_config)
+        self.update_winlator_tab = create_winlator_tab(notebook, self.app_config)
+        self.update_config_tab = create_scrcpy_tab(notebook, self.app_config, style, restart_app_callback)
+
+        self.poll_device_connection()
+
+    def poll_device_connection(self):
+        current_device_id = adb_handler.get_connected_device_id()
+        initial_id = self.app_config.get('device_id').get()
+
+        if current_device_id != initial_id and not (current_device_id is None and initial_id == 'no_device'):
+            new_id = current_device_id if current_device_id else "no_device"
+            is_new_config = self.app_config.load_config_for_device(new_id)
+            
+            self.update_apps_tab(force_refresh=is_new_config)
+            self.update_winlator_tab(force_refresh=is_new_config)
+            self.update_config_tab(force_encoder_fetch=is_new_config)
+            
+        self.root.after(5000, self.poll_device_connection)
 
     def open_session_manager(self):
         from .scrcpy_session_manager_window import ScrcpySessionManagerWindow

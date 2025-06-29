@@ -185,18 +185,6 @@ def list_installed_apps():
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
         raise RuntimeError(f"Could not list apps via scrcpy: {e}")
 
-def save_app_list_to_cache(apps, cache_path):
-    os.makedirs(os.path.dirname(cache_path), exist_ok=True)
-    with open(cache_path, "w", encoding='utf-8') as f:
-        json.dump(apps, f, indent=2)
-
-def load_cached_apps(cache_path):
-    if os.path.exists(cache_path):
-        with open(cache_path, "r", encoding='utf-8') as f:
-            try: return json.load(f)
-            except json.JSONDecodeError: return {}
-    return {}
-
 def list_encoders():
     video_encoders = {}
     audio_encoders = {}

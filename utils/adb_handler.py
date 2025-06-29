@@ -33,11 +33,14 @@ def _run_adb_command(command, device_id=None, print_command=False, ignore_errors
 def get_device_info(device_id=None):
     """Obtém o nome do modelo e o nível da bateria do dispositivo."""
     name = _run_adb_command(['shell', 'getprop', 'ro.product.vendor.marketname'], device_id)
-    if not name: return "Device not connected or ADB error"
+    if not name:
+        raise ConnectionError("Device not connected or ADB error")
+    
     battery_output = _run_adb_command(['shell', 'dumpsys', 'battery'], device_id, ignore_errors=True)
     level_match = re.search(r'level: (\d+)', battery_output)
     battery_level = level_match.group(1) if level_match else "?"
-    return f"Connected to {name} (Battery: {battery_level}%)"
+    
+    return {"commercial_name": name, "battery": battery_level}
 
 def list_winlator_shortcuts(device_id=None):
     """Lista os caminhos dos atalhos .desktop do Winlator no dispositivo."""
@@ -123,3 +126,21 @@ def turn_screen_off(device_id=None):
     output = _run_adb_command(['shell', 'dumpsys', 'input_method'], device_id)
     if 'mInteractive=true' in output:
         _run_adb_command(['shell', 'input', 'keyevent', 'KEYCODE_POWER'], device_id)
+
+def get_connected_device_id():
+    """
+    Retorna o ID do primeiro dispositivo ADB conectado.
+    Se nenhum dispositivo estiver conectado, retorna None.
+    """
+    try:
+        output = subprocess.check_output(['adb', 'devices'], text=True, stderr=subprocess.PIPE)
+        lines = output.strip().split('\n')
+        if len(lines) > 1:
+            for line in lines[1:]:
+                if '\t' in line:
+                    device_id, state = line.split('\t')
+                    if device_id.strip() and 'device' in state:
+                        return device_id.strip()
+        return None
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return None

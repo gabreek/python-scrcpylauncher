@@ -13,7 +13,7 @@ def get_game_icon(game_name, game_path, app_config, download_if_missing=True):
     Obtém o ícone de um jogo do Winlator, buscando no SteamGridDB.
     Retorna o caminho para o ícone em cache ou None.
     """
-    cache_dir = app_config.ICON_CACHE_DIR
+    cache_dir = app_config.get_icon_cache_dir()
     # Usa o nome do arquivo .desktop como chave única para o ícone
     icon_key = os.path.basename(game_path)
     icon_path = os.path.join(cache_dir, f"{icon_key}.png")
