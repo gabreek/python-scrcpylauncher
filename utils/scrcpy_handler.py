@@ -12,9 +12,9 @@ import threading
 # Lista global para armazenar as sessões Scrcpy ativas
 active_scrcpy_sessions = []
 
-def add_scrcpy_session(pid, app_name, icon_path, command_args):
-    active_scrcpy_sessions.append({'pid': pid, 'app_name': app_name, 'icon_path': icon_path, 'command_args': command_args})
-    print(f"[scrcpy_handler] Added session: PID={pid}, AppName={app_name}")
+def add_scrcpy_session(pid, app_name, icon_path, command_args, session_type='app'):
+    active_scrcpy_sessions.append({'pid': pid, 'app_name': app_name, 'icon_path': icon_path, 'command_args': command_args, 'session_type': session_type})
+    print(f"[scrcpy_handler] Added session: PID={pid}, AppName={app_name}, Type={session_type}")
 
 def remove_scrcpy_session(pid):
     global active_scrcpy_sessions
@@ -25,14 +25,17 @@ def remove_scrcpy_session(pid):
 
 def get_active_scrcpy_sessions():
     print(f"[scrcpy_handler] Checking active sessions. Current count: {len(active_scrcpy_sessions)}")
-    current_pids = {p.pid for p in psutil.process_iter(['pid'])} # Otimização: obter PIDs uma vez
+    current_pids = {p.pid for p in psutil.process_iter(['pid', 'name', 'cmdline'])} # Otimização: obter PIDs uma vez
+    print(f"[scrcpy_handler] Current PIDs found: {len(current_pids)}")
     valid_sessions = []
     for session in active_scrcpy_sessions:
+        print(f"[scrcpy_handler] Processing session PID: {session['pid']}")
         if session['pid'] in current_pids:
             try:
                 proc = psutil.Process(session['pid'])
                 proc_name = proc.name().lower()
                 proc_cmdline = " ".join(proc.cmdline())
+                print(f"[scrcpy_handler] PID {session['pid']} - Name: {proc_name}, Cmdline: {proc_cmdline}")
                 if proc.is_running() and ('scrcpy' in proc_name or 'scrcpy' in proc_cmdline):
                     valid_sessions.append(session)
                 else:
@@ -130,7 +133,7 @@ def _build_command(config_values, window_title=None, device_id=None):
 
     return cmd
 
-def launch_scrcpy(config_values, capture_output=False, window_title=None, device_id=None, icon_path=None):
+def launch_scrcpy(config_values, capture_output=False, window_title=None, device_id=None, icon_path=None, session_type='app'):
     """
     Inicia o scrcpy com base na configuração fornecida, definindo o ícone
     através de uma variável de ambiente.
@@ -162,7 +165,7 @@ def launch_scrcpy(config_values, capture_output=False, window_title=None, device
 
     # Adiciona a sessão à lista de sessões ativas
     app_name = window_title or config_values.get('start_app_name') or 'Unknown App'
-    add_scrcpy_session(process.pid, app_name, icon_path, cmd)
+    add_scrcpy_session(process.pid, app_name, icon_path, cmd, session_type)
 
     return process
 

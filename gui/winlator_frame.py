@@ -163,7 +163,8 @@ def create_winlator_tab(notebook, app_config):
                      on_error=on_scrcpy_error,
                      capture_output=True,
                      window_title=game_name,
-                     icon_path=icon_path)
+                     icon_path=icon_path,
+                     session_type='winlator')
 
     def populate_games_grid():
         for widget in content_frame.winfo_children(): widget.destroy()
@@ -188,7 +189,7 @@ def create_winlator_tab(notebook, app_config):
             if os.path.exists(cached_icon_path):
                 if item.frame.winfo_exists():
                     try: img = Image.open(cached_icon_path).resize((48, 48), Image.LANCZOS); photo = ImageTk.PhotoImage(img); winlator_frame.after(0, item.set_icon, photo)
-                    except Exception as e: print(f"Erro ao carregar ícone do cache para {path}: {e}")
+                    except Exception as e: print(f"Erro ao carregar ícone do cache para {path}: {e}"); winlator_frame.after(0, item.set_icon, placeholder_icon); winlator_frame.after(0, item.set_icon, placeholder_icon)
 
     def prompt_for_icon_update():
         missing_icons = []

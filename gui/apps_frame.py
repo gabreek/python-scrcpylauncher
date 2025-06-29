@@ -125,7 +125,8 @@ def create_apps_tab(notebook, app_config):
             config_values=config_to_use,
             window_title=app_data['app_name'],
             on_error=lambda e: messagebox.showerror("Scrcpy Error", f"Failed to launch {app_data['app_name']}:\n{e}"),
-            icon_path=icon_path # Passa o novo argumento
+            icon_path=icon_path, # Passa o novo argumento
+            session_type='app'
         )
 
     def populate_apps_grid(filter_text="", force_icon_download=False):
@@ -167,7 +168,9 @@ def create_apps_tab(notebook, app_config):
                 try:
                     img = Image.open(icon_path).resize((48, 48), Image.LANCZOS); photo = ImageTk.PhotoImage(img)
                     apps_frame.after(0, item.set_icon, photo)
-                except Exception as e: print(f"Error loading icon for {pkg_name}: {e}")
+                except Exception as e:
+                    print(f"Error loading icon for {pkg_name}: {e}")
+                    apps_frame.after(0, item.set_icon, placeholder_icon) # Set fallback icon on error
 
     def on_search_change(*_):
         apps_frame.after(300, lambda: populate_apps_grid(search_var.get()))

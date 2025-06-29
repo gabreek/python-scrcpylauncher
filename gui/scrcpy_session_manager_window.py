@@ -15,6 +15,22 @@ class ScrcpySessionManagerWindow:
 
         self.window.protocol("WM_DELETE_WINDOW", self._on_closing)
 
+        # Load default placeholder icon
+        try:
+            self.default_icon_img = Image.open("gui/placeholder.png").resize((32, 32), Image.LANCZOS)
+            self.default_icon = ImageTk.PhotoImage(self.default_icon_img)
+        except (FileNotFoundError, NameError):
+            self.default_icon_img = Image.new('RGBA', (32, 32), (60, 60, 60, 255))
+            self.default_icon = ImageTk.PhotoImage(self.default_icon_img)
+
+        # Load Winlator placeholder icon
+        try:
+            self.winlator_icon_img = Image.open("gui/winlator_placeholder.png").resize((32, 32), Image.LANCZOS)
+            self.winlator_icon = ImageTk.PhotoImage(self.winlator_icon_img)
+        except (FileNotFoundError, NameError):
+            self.winlator_icon_img = Image.new('RGBA', (32, 32), (60, 60, 60, 255))
+            self.winlator_icon = ImageTk.PhotoImage(self.winlator_icon_img)
+
         # Bind to the parent window's <Configure> event to track its position
         self._parent_configure_funcid = self.parent_root.bind('<Configure>', self._on_parent_configure)
 
@@ -30,9 +46,6 @@ class ScrcpySessionManagerWindow:
         # Top button frame for Refresh
         self.button_frame = ttk.Frame(self.window)
         self.button_frame.pack(fill='x', pady=5)
-
-        self.refresh_button = ttk.Button(self.button_frame, text="Refresh Sessions", command=self.populate_sessions, style="Small.TButton")
-        self.refresh_button.pack(side='right', padx=5)
 
         # Treeview for sessions
         self.tree = ttk.Treeview(self.window, show="tree") # Only show the tree column (default #0)
@@ -104,6 +117,13 @@ class ScrcpySessionManagerWindow:
                     self.image_refs.append(icon_photo) # Keep a reference
                 except Exception as e:
                     print(f"Error loading icon {session['icon_path']}: {e}")
+            
+            # Use default icon if no specific icon is loaded
+            if icon_photo is None:
+                if session.get('session_type') == 'winlator':
+                    icon_photo = self.winlator_icon
+                else:
+                    icon_photo = self.default_icon
 
             self.tree.insert('', 'end',
                              text=session['app_name'],
