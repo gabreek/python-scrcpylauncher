@@ -5,15 +5,17 @@ Hello everyone,
 I would like to inform you that this repository (`python-scrcpylauncher`) will
 no longer receive updates or support.
 
-I'm excited to announce the launch of its successor: **qt-yaScrcpy**!
+I'm excited to announce the launch of its successor: **qt-yaScrcpy GUI**!
 
  **qt-yaScrcpy** has been completely rewritten using **PySide6 (Qt)**, resulting
 in a much **faster, more modern, and visually superior application**. It retains
 all the features you love, but with enhanced performance and stability.
 
 **I strongly recommend all users migrate to the new project.**
+
 You can find the new repository here:
-[https://github.com/gabreek/qt-yaScrcpy](https://github.com/gabreek/qt-yaScrcpy)
+https://github.com/gabreek/qt-yascrcpygui
+
 Thank you for your support of this project, and we look forward to seeing you on
       **qt-yaScrcpy**!
 
