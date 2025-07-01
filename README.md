@@ -1,3 +1,27 @@
+**ATTENTION: This project has been discontinued!** 
+
+Hello everyone,
+
+I would like to inform you that this repository (`python-scrcpylauncher`) will
+no longer receive updates or support.
+
+I'm excited to announce the launch of its successor: **qt-yaScrcpy**!
+
+ **qt-yaScrcpy** has been completely rewritten using **PySide6 (Qt)**, resulting
+in a much **faster, more modern, and visually superior application**. It retains
+all the features you love, but with enhanced performance and stability.
+
+**I strongly recommend all users migrate to the new project.**
+You can find the new repository here:
+[https://github.com/gabreek/qt-yaScrcpy](https://github.com/gabreek/qt-yaScrcpy)
+Thank you for your support of this project, and we look forward to seeing you on
+      **qt-yaScrcpy**!
+
+
+**ATTENTION: This project has been discontinued!**
+
+
+
 # Scrcpy Launcher
 
 A simple and lightweight scrcpy GUI compatible with Winlator (bionic) shortcuts.
@@ -19,16 +43,6 @@ This tool provides a user-friendly graphical interface to manage and launch `scr
     * Save specific `scrcpy` settings for each game, perfect for custom resolutions and performance tuning.
 * **Advanced Scrcpy Configuration:** A dedicated tab to tweak all major `scrcpy` settings, including resolution, bitrate, codecs, and more. All settings are saved automatically. (First release requires you to open the program with the phone connected via usb to populate codecs lists)
 * **Custom Window Icons:** The `scrcpy` window will automatically use the game's or app's icon, providing a native look and feel.
-
----
-
-## 🚧 To-Do / Future Features
-
-- [ ] Finish options GUI (you can use custom options commands).
-- [ ] Multiple windows audio management.
-- [ ] Full support for ADB over WiFi.
-- [ ] Multi-device management interface.
-- [ ] ... any other ideas are welcome!
 
 ---
 
@@ -86,11 +100,3 @@ A convenience script `run.sh` is provided to automatically activate the virtual 
 
 ---
 
-## 🎨 Custom Icons
-
-One of the key features is the ability to easily customize icons for your apps and games.
-
-* **Android Apps:** If you don't like the icon scraped from the Play Store, simply drag and drop your preferred image file (`.png`, `.jpg`, etc.) directly onto the existing icon in the "Apps" tab.
-* **Winlator Games:** If the icon extracted from the `.exe` is incorrect or missing, just drag and drop your game's poster or icon onto the placeholder in the "Winlator" tab.
-
-The new icon will be automatically resized, converted to `.png`, and cached for future use.
